@@ -1,0 +1,35 @@
+gate:
+  story: 3.2.browse-filter-qr-codes
+  title: "Browse & Filter QR Codes"
+  date: 2026-02-19
+  reviewer: Quinn (Test Architect)
+  decision: PASS
+  rationale: >-
+    All 10 acceptance criteria implemented and verified. All critical and high risks fully mitigated in code. Security posture is strong: [Authorize] enforcement, CSRF protection, strict UserId filtering, server-side validation, parameterised queries, and XSS prevention via Razor encoding. One minor NFR recommendation (secrets management) is non-blocking and deferred to deployment. Story is approved for progression to Story 4.1.
+  nfr_quality_score: 91
+  build_verified: true
+  cross_references:
+    story: "docs/stories/3.2.browse-filter-qr-codes.md"
+    review: "qa/assessments/3.2-browse-filter-qr-codes-review-20260219.md"
+    nfr: "qa/assessments/3.2-browse-filter-qr-codes-nfr-20260219.md"
+    trace: "qa/assessments/3.2-browse-filter-qr-codes-trace-20260219.md"
+    risk: "qa/assessments/3.2-browse-filter-qr-codes-risk-20260219.md"
+    test_design: "qa/assessments/3.2-browse-filter-qr-codes-test-design-20260219.md"
+
+risk_summary:
+  totals:
+    critical: 1
+    high: 2
+    medium: 2
+    low: 2
+  all_critical_mitigated: true
+  all_high_mitigated: true
+  highest:
+    id: SEC-001
+    score: 9
+    title: "Strict UserId filtering for data isolation"
+  recommendations:
+    must_fix: []
+    before_production:
+      - "Move DB connection string to User Secrets (dev) or environment variable / Key Vault (prod)"
+    monitor: []

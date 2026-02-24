@@ -1,0 +1,102 @@
+BMAD			Breakthrough Method of Agile AI Driven Development
+--------------------------------------------------------------------------------
+Start from here:
+https://github.com/bmad-code-org/BMAD-METHOD
+https://github.com/bmad-code-org/BMAD-METHOD/blob/main/README.md
+https://github.com/bmad-code-org/BMAD-METHOD/blob/V4/docs/user-guide.md
+
+https://docs.bmad-method.org/tutorials/getting-started/
+
+--------------------------------------------------------------------------------
+Install:
+Required for the installer: 	Node.js 20+
+install version 4:				npx bmad-method@4.44.1 install
+in case installation do not work it might need to allow scripts to run, in power shell as admin: 	
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+
+Extensions for VSCode:
+Markdown All in One (will allow righ click -> open preview)
+Markdown Preview Mermaid Support (view diagramms)
+
+--------------------------------------------------------------------------------
+Abreviations:
+PRD 	Product Requirments Document
+FR 		Functional Requirements
+NFRs 	Non-Functional Requirements
+
+--------------------------------------------------------------------------------
+Simple Path (Quick Flow)
+Bug fixes, small features, clear scope — 3 commands - 1 Optional Agent:
+/quick-spec — analyzes your codebase and produces a tech-spec with stories
+/dev-story — implements each story
+/code-review — validates quality
+
+--------------------------------------------------------------------------------
+Full Planning Path (BMad Method)
+Products, platforms, complex features — structured planning then build:
+/product-brief — define problem, users, and MVP scope
+/create-prd — full requirements with personas, metrics, and risks
+/create-architecture — technical decisions and system design
+/create-epics-and-stories — break work into prioritized stories
+/sprint-planning — initialize sprint tracking
+Repeat per story: /create-story → /dev-story → /code-review
+
+--------------------------------------------------------------------------------
+BMAD Core Development Cycle: Step-by-Step Checklist
+
+1. Select a Story
+	Choose a story from your sharded docs/stories/ folder to work on.
+	Update status to: In Progress
+
+2. Run Risk Assessment
+	Use the QA/Test Architect agent.
+	Prompt:
+		@qa *risk {story-file.md}
+		(Replace {story-file.md} with your actual story file name.)
+
+3. Create Test Design
+	Use the QA/Test Architect agent.
+	Prompt:
+		@qa *design {story-file.md}
+
+4. Review Risk & Test Design Outputs
+	Check docs/qa/assessments/ for generated risk and test design files.
+	Ensure all major risks and test strategies are addressed.
+
+5. Implement the Story
+	Begin development work as described in the story.
+	Write code and tests according to the test design.
+	Prompt:
+		@dev *develop-story {story-file.md}
+
+6. Mid-Development QA Check (Optional but recommended)
+	Use the QA/Test Architect agent.
+	Prompt:
+		@qa *trace {story-file.md}
+		@qa *nfr {story-file.md}
+
+7. Mark Story Ready for Review
+	When development and tests are complete, mark the story as ready.
+	Update status to: Ready for Review
+
+8. Comprehensive QA Review
+	Use the QA/Test Architect agent.
+	Prompt:
+		@qa *review {story-file.md}
+
+9. Update Quality Gate
+	After addressing any review feedback, update the quality gate.
+	Prompt:
+		@qa *gate {story-file.md}
+	Update status to: Done (or Completed)
+
+10. Repeat for Next Story
+	Select the next story and repeat the process.
+
+--------------------------------------------------------------------------------
+account to sent emails, mail server
+
+acc: grcodegeneratoremail@gmail.com
+pass: gLcqRrkg61HMIhbJdzhO
+app: qrcodegenerator
+app pass: levszcgnqufxhngs

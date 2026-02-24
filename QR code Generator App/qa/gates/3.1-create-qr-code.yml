@@ -1,0 +1,139 @@
+gate:
+  story: 3.1.create-qr-code
+  title: "Create QR Code"
+  date: 2026-02-19
+  reviewer: Quinn (Test Architect)
+  decision: PASS
+  rationale: >-
+    All 12 acceptance criteria implemented and verified. All 2 critical and all 4 high
+    risks fully mitigated in code. Security posture is strong: [Authorize] enforcement,
+    CSRF protection, UserId never sourced from form input, server-side validation
+    independent of client, SVG served as base64 data URI (no XSS vector), IDOR check
+    on previewId. Three minor NFR recommendations are non-blocking and deferred to
+    appropriate future stories. Story is approved for progression to Story 3.2.
+  nfr_quality_score: 89
+  build_verified: true
+  cross_references:
+    story: "docs/stories/3.1.create-qr-code.md"
+    review: "qa/assessments/3.1.create-qr-code-review-20260219.md"
+    nfr: "qa/assessments/3.1.create-qr-code-nfr-20260219.md"
+    trace: "qa/assessments/3.1.create-qr-code-trace-20260219.md"
+    risk: "qa/assessments/3.1.create-qr-code-risk-20260218.md"
+    test_design: "qa/assessments/3.1.create-qr-code-test-design-20260218.md"
+
+risk_summary:
+  totals:
+    critical: 2
+    high: 4
+    medium: 4
+    low: 3
+  all_critical_mitigated: true
+  all_high_mitigated: true
+  highest:
+    id: SEC-001
+    score: 9
+    title: "UserId sourced from authenticated context, not form body"
+  recommendations:
+    must_fix: []
+    before_production:
+      - "Move DB connection string to User Secrets (dev) or environment variable / Key Vault (prod)"
+    monitor:
+      - "Wrap SaveChangesAsync() in try/catch with user-facing error message and Error-level log"
+      - "Add pagination to QRCodes/Index (deferred to Story 3.2)"
+
+nfr_validation:
+  _assessed: [security, performance, reliability, usability, maintainability, auditability, data_integrity, compliance]
+  security:
+    status: PASS
+    notes: >-
+      [Authorize] class-level; [ValidateAntiForgeryToken]; no UserId in ViewModel;
+      ModelState.IsValid gate; service-layer defence-in-depth regex; Razor auto-encoding
+      prevents stored XSS; SVG as base64 data URI prevents SVG XSS; IDOR check on previewId.
+      1 low gap: connection string in appsettings.json.
+  performance:
+    status: PASS
+    notes: >-
+      QR generation is in-process sub-millisecond; single DB INSERT with indexed UserId column.
+      1 deferred gap: no pagination on Index (Story 3.2).
+  reliability:
+    status: PASS
+    notes: >-
+      DataTooLongException and version-capacity mismatch handled gracefully; no 500 pages
+      on encoding failures. 1 medium gap: no try/catch on SaveChangesAsync().
+  usability:
+    status: PASS
+    notes: >-
+      Inline validation feedback; sensible defaults (ECC=M, Version=5); live Notes character
+      counter (red at 280+); QR preview on Create page post-redirect; PNG download with
+      decoded text as filename. Exceeds spec.
+  maintainability:
+    status: PASS
+    notes: >-
+      IQRCodeService abstraction; clean DI; no magic strings; dedicated EF configuration class;
+      consistent QRCodeGeneratorApp namespace throughout.
+  auditability:
+    status: PASS
+    notes: >-
+      LogInformation with UserId, QRCodeId, ECC, Version on every successful create.
+      DecodedText intentionally excluded from logs. UTC timestamps in DB.
+  data_integrity:
+    status: PASS
+    notes: >-
+      UserId NOT NULL FK to AspNetUsers.Id with CASCADE DELETE; check constraints on
+      ECC and Version; Notes nvarchar(300) via HasMaxLength(300) migration applied.
+  compliance:
+    status: PASS
+    notes: >-
+      OWASP mitigated: Broken Access Control, Injection, XSS, CSRF.
+      GDPR: data minimisation, per-user isolation.
+
+test_design:
+  scenarios_total: 34
+  by_level:
+    unit: 14
+    integration: 13
+    e2e: 7
+  by_priority:
+    p0: 14
+    p1: 13
+    p2: 6
+    p3: 1
+  coverage_gaps: []
+
+trace:
+  totals:
+    requirements: 12
+    full: 12
+    partial: 0
+    none: 0
+  uncovered: []
+  deviations:
+    - id: DEV-001
+      description: "Preview shown on Create page post-redirect (not inline same-page)"
+      accepted: true
+    - id: DEV-002
+      description: "Redirect to Create?previewId instead of Details page (Story 3.3 not yet built)"
+      accepted: true
+    - id: DEV-003
+      description: "PNG download provided instead of PDF (PDF is Story 4.1)"
+      accepted: true
+  notes: "See qa/assessments/3.1.create-qr-code-trace-20260219.md"
+
+open_items:
+  - story: "3.3"
+    item: "Update POST redirect to QR Code Details page once built"
+  - story: "3.2"
+    item: "Add pagination to QRCodes/Index"
+  - story: "4.1"
+    item: "PDF export from QR Code Details"
+  - story: "3.2"
+    item: "Wrap SaveChangesAsync() in try/catch with user-facing error"
+  - story: "ops"
+    item: "Move connection string to User Secrets / environment variable"
+
+assessments:
+  review: "qa/assessments/3.1.create-qr-code-review-20260219.md"
+  nfr: "qa/assessments/3.1.create-qr-code-nfr-20260219.md"
+  trace: "qa/assessments/3.1.create-qr-code-trace-20260219.md"
+  risk: "qa/assessments/3.1.create-qr-code-risk-20260218.md"
+  test_design: "qa/assessments/3.1.create-qr-code-test-design-20260218.md"

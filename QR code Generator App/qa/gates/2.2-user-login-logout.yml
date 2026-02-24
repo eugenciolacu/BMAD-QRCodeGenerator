@@ -1,0 +1,131 @@
+# Quality Gate: Story 2.2 User Login & Logout
+
+date: 2026-02-17
+gate_decision: PASS
+reviewer: Quinn (Test Architect)
+
+risk_summary:
+  totals:
+    critical: 0
+    high: 2
+    medium: 2
+    low: 2
+  highest:
+    id: SEC-001
+    score: 6
+    title: Authentication flaws (e.g., weak password, brute force)
+  recommendations:
+    must_fix: []
+    monitor:
+      - "Monitor login endpoint for brute force attempts"
+      - "Review session management logs for anomalies"
+
+nfr_validation:
+  security:
+    status: PASS
+    notes:
+      - "Identity-based authentication with secure session management."
+      - "Anti-forgery tokens enforced globally on POST requests."
+      - "Secure cookies: HttpOnly, Secure, SameSite=Strict."
+      - "Session timeout: 30 minutes sliding expiration."
+      - "Failed login attempts logged for security monitoring."
+      - "Generic error messages prevent account enumeration."
+      - "Rate limiting protects against brute-force attacks."
+  performance:
+    status: PASS
+    notes:
+      - "Simple login/logout flow with standard Identity operations."
+      - "Global rate limiting reduces abusive load."
+      - "Efficient session/cookie management."
+  reliability:
+    status: PASS
+    notes:
+      - "Identity handles common error paths (invalid credentials, lockout)."
+      - "Comprehensive logging for all auth events (success, failure, lockout)."
+      - "Session/cookie invalidation on logout ensures clean state."
+      - "Automatic session timeout after inactivity."
+  maintainability:
+    status: PASS
+    notes:
+      - "Uses Identity scaffolding and framework conventions."
+      - "UI styling consistent with registration page (Bootstrap 5)."
+      - "Configuration centralized in Program.cs."
+      - "Test design, risk profile, and trace matrices exist."
+  overall_score: 100
+  concerns: []
+
+test_design:
+  scenarios_total: 13
+  by_level:
+    unit: 3
+    integration: 5
+    e2e: 5
+  by_priority:
+    p0: 5
+    p1: 5
+    p2: 3
+  coverage_gaps: []
+
+traceability:
+  matrix: qa/assessments/2.2-user-login-logout-trace-20260217.md
+
+qa_results:
+  summary: |
+    All acceptance criteria are met. Login and logout functionality is secure, robust, and user-friendly. All authentication, session management, logging, and security requirements are satisfied. UI is styled consistently with Bootstrap 5 and matches requirements. Documentation and test coverage are complete. No open concerns remain for this story.
+  reviewer_notes: |
+    - Login/logout implemented via ASP.NET Core Identity Razor Pages (scaffolded).
+    - Failed login attempts logged in Login.cshtml.cs for security monitoring.
+    - Session timeout configured to 30 minutes sliding expiration in Program.cs.
+    - Secure cookies configured (HttpOnly, Secure, SameSite=Strict).
+    - Anti-forgery tokens enforced globally on all POST requests.
+    - Logout button conditionally displayed in _Layout.cshtml navigation based on authentication status.
+    - Login page styled with Bootstrap 5 centered card layout, consistent with registration.
+    - Generic error messages on failed login prevent account enumeration.
+    - All endpoints, validation, and security features align with architecture and epic requirements.
+    - Test design, risk profile, NFR assessment, and traceability matrix created and comprehensive.
+    - Ready for production or further review.
+
+implementation:
+  files_modified:
+    - QRCodeGenerator/Areas/Identity/Pages/Account/Login.cshtml
+    - QRCodeGenerator/Areas/Identity/Pages/Account/Login.cshtml.cs
+    - QRCodeGenerator/Views/Shared/_Layout.cshtml
+    - QRCodeGenerator/Program.cs
+  files_created:
+    - qa/assessments/2.2-user-login-logout-test-design-20260217.md
+    - qa/assessments/2.2-user-login-logout-risk-profile.md
+    - qa/assessments/2.2-user-login-logout-trace-20260217.md
+    - qa/assessments/2.2-user-login-logout-nfr-20260217.md
+    - qa/gates/2.2-user-login-logout.yml
+
+acceptance_criteria_verification:
+  AC1_login_page_accessible:
+    status: PASS
+    evidence: "Login page scaffolded at /Identity/Account/Login and accessible via navigation link"
+  AC2_form_requires_email_password:
+    status: PASS
+    evidence: "InputModel requires Email and Password with [Required] data annotations"
+  AC3_successful_login_redirects:
+    status: PASS
+    evidence: "Login.cshtml.cs redirects to returnUrl (Dashboard) on successful authentication"
+  AC4_invalid_credentials_generic_error:
+    status: PASS
+    evidence: "Generic error message 'Invalid login attempt' shown on authentication failure"
+  AC5_client_server_validation:
+    status: PASS
+    evidence: "Client-side validation via Bootstrap 5 and server-side via Data Annotations and Identity"
+  AC6_logout_invalidates_session:
+    status: PASS
+    evidence: "Logout POST form uses Identity's logout mechanism which invalidates session/cookie"
+  AC7_logout_in_navbar:
+    status: PASS
+    evidence: "Logout button visible in _Layout.cshtml navigation when authenticated"
+  AC8_failed_login_logged:
+    status: PASS
+    evidence: "Login.cshtml.cs logs failed attempts: _logger.LogWarning('Failed login attempt for user {Email}.', Input.Email)"
+  AC9_session_timeout_configured:
+    status: PASS
+    evidence: "Program.cs sets ExpireTimeSpan = TimeSpan.FromMinutes(30) with SlidingExpiration = true"
+  AC10_page_matches_spec:
+    status: PASS
+    evidence: "Login.cshtml uses Bootstrap 5 centered card layout with Forgot Password and Register links"

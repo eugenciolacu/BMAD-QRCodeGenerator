@@ -1,0 +1,61 @@
+gate_status: PASS
+story: "3.3 — View QR Code Details"
+reviewer: "QA (BMad Master)"
+date: "2026-02-20"
+
+assessment_references:
+  trace: "qa/assessments/3.3.qr-code-details-trace-20260220.md"
+  nfr: "qa/assessments/3.3.qr-code-details-nfr-20260220.md"
+  review: "qa/assessments/3.3.qr-code-details-review-20260220.md"
+
+acceptance_criteria:
+  - id: AC-1
+    description: "Details page accessible from QR codes list"
+    status: PASS
+  - id: AC-2
+    description: "All metadata fields displayed (DecodedText, ECC, Version, CreatedAt, Notes)"
+    status: PASS
+  - id: AC-3
+    description: "QR code preview rendered on-the-fly"
+    status: PASS
+  - id: AC-4
+    description: "Download PDF, Download Image, Delete buttons present"
+    status: PASS
+  - id: AC-5
+    description: "Back to My QR Codes link present"
+    status: PASS
+  - id: AC-6a
+    description: "Delete button present; functionality deferred to Story 3.4"
+    status: PASS
+  - id: AC-6b
+    description: "Ownership enforced — other user's QR code returns 404"
+    status: PASS
+  - id: AC-7
+    description: "Non-existent QR code ID returns 404"
+    status: PASS
+  - id: AC-8
+    description: "Bootstrap 5 card layout per front-end spec"
+    status: PASS
+
+nfr_summary:
+  security: PASS
+  performance: PASS
+  reliability: PASS
+  maintainability: PASS
+
+issues:
+  - severity: info
+    description: "No automated tests — manual testing only, accepted per story notes"
+    waived: true
+    reason: "Story dev notes explicitly state no formal unit tests required"
+    approver: "Team"
+  - severity: info
+    description: "Delete button posts to unimplemented action — Story 3.4 deferral"
+    waived: true
+    reason: "Intentional deferral documented in story"
+    approver: "Team"
+
+notes:
+  - "All acceptance criteria met and traceable"
+  - "Security controls: [Authorize], ownership check, CSRF, XSS prevention all in place"
+  - "Story approved to be marked Done"

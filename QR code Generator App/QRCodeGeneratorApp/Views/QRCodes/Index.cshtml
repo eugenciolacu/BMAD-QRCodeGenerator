@@ -1,0 +1,397 @@
+@model QRCodeGeneratorApp.Models.QRCodesListViewModel
+@{
+    ViewData["Title"] = "My QR Codes";
+}
+
+<style>
+    /* Pagination styling to match button appearance (btn btn-outline-primary) */
+    .pagination .page-link {
+        color: #0d6efd;
+        border-color: #0d6efd;
+        background-color: transparent;
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        transition: all 0.15s ease-in-out;
+    }
+
+    .pagination .page-link:hover:not(.disabled) {
+        color: #fff;
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .pagination .page-item.active .page-link {
+        color: #fff;
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        color: #6c757d;
+        pointer-events: none;
+        cursor: auto;
+        background-color: transparent;
+        border-color: #dee2e6;
+    }
+</style>
+
+<h2 class="mb-4">My QR Codes</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<!-- Per-column filter form (GET — preserves filters across pagination) -->
+<form method="get" asp-action="Index">
+    <!-- Row 1: text filters -->
+    <div class="row g-2 align-items-end mb-2">
+        <div class="col">
+            <label class="form-label small mb-1">Content</label>
+            <input type="text"
+                   name="filterContent"
+                   value="@Model.FilterContent"
+                   class="form-control form-control-sm"
+                   placeholder="Filter…"
+                   maxlength="200" />
+        </div>
+        <div class="col-auto" style="width:90px">
+            <label class="form-label small mb-1">ECC</label>
+            <input type="text"
+                   name="filterEcc"
+                   value="@Model.FilterEcc"
+                   class="form-control form-control-sm"
+                   placeholder="L/M/Q/H"
+                   maxlength="1" />
+        </div>
+        <div class="col-auto" style="width:90px">
+            <label class="form-label small mb-1">Version</label>
+            <input type="number"
+                   name="filterVersion"
+                   value="@Model.FilterVersion"
+                   class="form-control form-control-sm"
+                   placeholder="1-10"
+                   min="1" max="10" />
+        </div>
+    </div>
+    <!-- Row 2: date pickers + Apply / Clear -->
+    <div class="row g-2 align-items-end mb-3">
+        <div class="col-auto" style="width:130px">
+            <label class="form-label small mb-1">Created From</label>
+            <input type="date"
+                   name="filterDateFrom"
+                   value="@(Model.FilterDateFrom.HasValue? Model.FilterDateFrom.Value.ToString("yyyy-MM-dd") : "")"
+                   class="form-control form-control-sm" />
+        </div>
+        <div class="col-auto" style="width:130px">
+            <label class="form-label small mb-1">Created To</label>
+            <input type="date"
+                   name="filterDateTo"
+                   value="@(Model.FilterDateTo.HasValue? Model.FilterDateTo.Value.ToString("yyyy-MM-dd") : "")"
+                   class="form-control form-control-sm" />
+        </div>
+        <div class="col">
+            <label class="form-label small mb-1">Notes</label>
+            <input type="text"
+                   name="filterNotes"
+                   value="@Model.FilterNotes"
+                   class="form-control form-control-sm"
+                   placeholder="Filter…"
+                   maxlength="200" />
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-outline-primary btn-sm">Apply</button>
+        </div>
+        @if (Model.HasActiveFilters)
+        {
+            <div class="col-auto">
+                <a asp-action="Index"
+                   asp-route-sortBy="@Model.SortBy"
+                   asp-route-sortDir="@Model.SortDir"
+                   class="btn btn-outline-secondary btn-sm">Clear</a>
+            </div>
+        }
+        <!-- Preserve sort when applying filters -->
+        <input type="hidden" name="sortBy" value="@Model.SortBy" />
+        <input type="hidden" name="sortDir" value="@Model.SortDir" />
+    </div>
+</form>
+
+<!-- Action buttons + sort controls in one row -->
+<div class="mb-3 d-flex align-items-center gap-2 flex-wrap">
+    <a id="btn-details"
+       class="btn btn-outline-primary disabled"
+       aria-disabled="true"
+       href="#">View Details</a>
+
+    <a id="btn-pdf"
+       class="btn btn-outline-success disabled"
+       aria-disabled="true"
+       href="#">Download PDF</a>
+
+    <!-- Download Image — format selector (AC: 2) -->
+    <div class="d-flex align-items-center gap-1">
+        <select id="img-format-index" class="form-select form-select-sm" style="width:auto" aria-label="Image format">
+            <option value="svg" selected>SVG</option>
+            <option value="png">PNG</option>
+        </select>
+        <a id="btn-image"
+           class="btn btn-outline-info disabled"
+           aria-disabled="true"
+           href="#">Download Image</a>
+    </div>
+
+    <button id="btn-delete"
+            class="btn btn-outline-danger"
+            disabled
+            type="button">Delete</button>
+
+    <div class="ms-auto d-flex align-items-center gap-2">
+        <label class="form-label small mb-0 text-nowrap">Sort by</label>
+        <select id="sort-by" class="form-select form-select-sm" style="width:auto" onchange="applySort()">
+            <option value="CreatedAt"           selected="@(Model.SortBy == "CreatedAt"           ? "selected" : null)">Created</option>
+            <option value="DecodedText"          selected="@(Model.SortBy == "DecodedText"          ? "selected" : null)">Content</option>
+            <option value="ErrorCorrectionLevel" selected="@(Model.SortBy == "ErrorCorrectionLevel" ? "selected" : null)">ECC</option>
+            <option value="QRVersion"            selected="@(Model.SortBy == "QRVersion"            ? "selected" : null)">Version</option>
+            <option value="Notes"                selected="@(Model.SortBy == "Notes"                ? "selected" : null)">Notes</option>
+        </select>
+        <select id="sort-dir" class="form-select form-select-sm" style="width:auto" onchange="applySort()">
+            <option value="desc" selected="@(Model.SortDir == "desc" ? "selected" : null)">Descending</option>
+            <option value="asc"  selected="@(Model.SortDir == "asc"  ? "selected" : null)">Ascending</option>
+        </select>
+    </div>
+</div>
+
+<!-- Table / empty states -->
+@if (Model.IsEmptyLibrary)
+{
+    <div class="alert alert-info">
+        You haven't created any QR codes yet.
+        <a asp-controller="QRCodes" asp-action="Create" class="alert-link">Create your first one</a>.
+    </div>
+}
+else if (Model.NoSearchResults)
+{
+    <div class="alert alert-warning">
+        No QR codes match the active filters.
+        <a asp-action="Index" class="alert-link">Clear filters</a> to see all your QR codes.
+    </div>
+}
+else
+{
+    <table class="table table-bordered table-hover" id="qr-table">
+        <thead class="table-light">
+            <tr>
+                <th>Content</th>
+                <th>ECC</th>
+                <th>Version</th>
+                <th>Created (UTC)</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr class="qr-row"
+                    data-id="@item.Id"
+                    data-details-url="@Url.Action("Details", "QRCodes", new { id = item.Id })"
+                    data-pdf-url="@Url.Action("DownloadPdf", "QRCodes", new { id = item.Id })"
+                    data-image-url="@Url.Action("DownloadImage", "QRCodes", new { id = item.Id })"
+                    data-delete-url="@Url.Action("Delete", "QRCodes", new { id = item.Id })"
+                    style="cursor:pointer;">
+                    <td style="word-break:break-word">@item.DecodedText</td>
+                    <td>@item.ErrorCorrectionLevel</td>
+                    <td>@item.QRVersion</td>
+                    <td style="white-space:normal">@item.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td style="word-break:break-word">@item.Notes</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Pagination controls -->
+    @if (Model.TotalPages > 1)
+    {
+        <div class="d-flex justify-content-center my-3">
+            <nav aria-label="QR code list pagination">
+                <ul class="pagination">
+                <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-filterContent="@Model.FilterContent"
+                       asp-route-filterEcc="@Model.FilterEcc"
+                       asp-route-filterVersion="@Model.FilterVersion"
+                       asp-route-filterNotes="@Model.FilterNotes"
+                       asp-route-filterDateFrom="@(Model.FilterDateFrom.HasValue ? Model.FilterDateFrom.Value.ToString("yyyy-MM-dd") : null)"
+                       asp-route-filterDateTo="@(Model.FilterDateTo.HasValue ? Model.FilterDateTo.Value.ToString("yyyy-MM-dd") : null)"
+                       asp-route-sortBy="@Model.SortBy"
+                       asp-route-sortDir="@Model.SortDir"
+                       asp-route-page="@(Model.Page - 1)">Previous</a>
+                </li>
+
+                @for (int p = 1; p <= Model.TotalPages; p++)
+                {
+                    <li class="page-item @(p == Model.Page ? "active" : "")">
+                        <a class="page-link"
+                           asp-action="Index"
+                           asp-route-filterContent="@Model.FilterContent"
+                           asp-route-filterEcc="@Model.FilterEcc"
+                           asp-route-filterVersion="@Model.FilterVersion"
+                           asp-route-filterNotes="@Model.FilterNotes"
+                           asp-route-filterDateFrom="@(Model.FilterDateFrom.HasValue ? Model.FilterDateFrom.Value.ToString("yyyy-MM-dd") : null)"
+                           asp-route-filterDateTo="@(Model.FilterDateTo.HasValue ? Model.FilterDateTo.Value.ToString("yyyy-MM-dd") : null)"
+                           asp-route-sortBy="@Model.SortBy"
+                           asp-route-sortDir="@Model.SortDir"
+                           asp-route-page="@p">@p</a>
+                    </li>
+                }
+
+                <li class="page-item @(Model.Page >= Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-filterContent="@Model.FilterContent"
+                       asp-route-filterEcc="@Model.FilterEcc"
+                       asp-route-filterVersion="@Model.FilterVersion"
+                       asp-route-filterNotes="@Model.FilterNotes"
+                       asp-route-filterDateFrom="@(Model.FilterDateFrom.HasValue ? Model.FilterDateFrom.Value.ToString("yyyy-MM-dd") : null)"
+                       asp-route-filterDateTo="@(Model.FilterDateTo.HasValue ? Model.FilterDateTo.Value.ToString("yyyy-MM-dd") : null)"
+                       asp-route-sortBy="@Model.SortBy"
+                       asp-route-sortDir="@Model.SortDir"
+                       asp-route-page="@(Model.Page + 1)">Next</a>
+                </li>
+            </ul>
+        </nav>
+        </div>
+    }
+
+    <p class="text-muted small">
+        Showing @Model.Items.Count of @Model.TotalCount result(s) — Page @Model.Page of @Model.TotalPages
+    </p>
+}
+
+@section Scripts {
+    <script>
+        // Sort navigation — preserves all active filter params
+        function applySort() {
+            const params = new URLSearchParams(window.location.search);
+            params.set('sortBy', document.getElementById('sort-by').value);
+            params.set('sortDir', document.getElementById('sort-dir').value);
+            params.delete('page'); // reset to page 1
+            window.location.search = params.toString();
+        }
+
+        // Row selection logic
+        let selectedId = null;
+
+        function disableActionButtons() {
+            const btnDetails = document.getElementById('btn-details');
+            const btnPdf = document.getElementById('btn-pdf');
+            const btnImage = document.getElementById('btn-image');
+            const btnDelete = document.getElementById('btn-delete');
+
+            btnDetails.classList.add('disabled');
+            btnDetails.setAttribute('aria-disabled', 'true');
+            btnDetails.href = '#';
+
+            btnPdf.classList.add('disabled');
+            btnPdf.setAttribute('aria-disabled', 'true');
+            btnPdf.href = '#';
+
+            btnImage.classList.add('disabled');
+            btnImage.setAttribute('aria-disabled', 'true');
+            btnImage.href = '#';
+
+            btnDelete.setAttribute('disabled', '');
+            btnDelete.onclick = null;
+        }
+
+        document.querySelectorAll('.qr-row').forEach(function (row) {
+            row.addEventListener('click', function () {
+                const isAlreadySelected = row.classList.contains('table-active');
+
+                // Deselect all rows
+                document.querySelectorAll('.qr-row').forEach(r => r.classList.remove('table-active'));
+                selectedId = null;
+
+                if (isAlreadySelected) {
+                    // Toggle off — disable buttons and return
+                    disableActionButtons();
+                    return;
+                }
+
+                // Select clicked row
+                row.classList.add('table-active');
+                selectedId = row.getAttribute('data-id');
+
+                const detailsUrl = row.getAttribute('data-details-url');
+                const pdfUrl = row.getAttribute('data-pdf-url');
+                const imageBaseUrl = row.getAttribute('data-image-url');
+                const deleteUrl = row.getAttribute('data-delete-url');
+
+                // Enable and wire action buttons
+                const btnDetails = document.getElementById('btn-details');
+                const btnPdf = document.getElementById('btn-pdf');
+                const btnImage = document.getElementById('btn-image');
+                const btnDelete = document.getElementById('btn-delete');
+
+                btnDetails.classList.remove('disabled');
+                btnDetails.removeAttribute('aria-disabled');
+                btnDetails.href = detailsUrl;
+
+                btnPdf.classList.remove('disabled');
+                btnPdf.removeAttribute('aria-disabled');
+                btnPdf.href = pdfUrl;
+
+                // Wire download image button with currently-selected format
+                function updateImageUrl() {
+                    var fmt = document.getElementById('img-format-index').value;
+                    btnImage.href = imageBaseUrl + '?format=' + fmt;
+                }
+                btnImage.classList.remove('disabled');
+                btnImage.removeAttribute('aria-disabled');
+                updateImageUrl();
+                document.getElementById('img-format-index').onchange = updateImageUrl;
+
+                btnDelete.removeAttribute('disabled');
+                btnDelete.onclick = function () {
+                    // Show delete confirmation modal instead of confirm() (Story 5.5)
+                    const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
+                    document.getElementById('confirmDeleteBtn').onclick = function () {
+                        const form = document.getElementById('delete-form');
+                        form.action = deleteUrl;
+                        form.submit();
+                    };
+                    deleteModal.show();
+                };
+            });
+        });
+    </script>
+
+    <!-- Hidden form for DELETE POST (anti-forgery handled here) -->
+    <form id="delete-form" method="post" style="display:none;">
+        @Html.AntiForgeryToken()
+    </form>
+}
+
+<!-- Delete Confirmation Modal (Story 5.5) -->
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger-subtle">
+                <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2"><strong>Are you sure you want to delete this QR code?</strong></p>
+                <p class="text-muted mb-0">This action cannot be undone. The QR code will be permanently removed from your account.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,129 @@
+@model QRCodeGeneratorApp.Models.CreateQRCodeViewModel
+@{
+    ViewData["Title"] = "Create QR Code";
+}
+
+@if (ViewBag.SuccessMessage != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @ViewBag.SuccessMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (ViewBag.QrSvg != null)
+{
+    <div class="mb-4 d-flex flex-column align-items-center">
+        <p class="fw-semibold mb-2 small text-muted">QR Code Preview</p>
+        <div class="border rounded p-3 bg-white">
+            <img id="qrPreviewImg" src="@ViewBag.QrSvg" alt="QR Code" style="width:280px;height:280px;" />
+        </div>
+        <div class="d-flex gap-2 mt-3">
+            <button type="button" class="btn btn-success" onclick="downloadQrPng()">&#8595; Download PNG</button>
+            <a asp-controller="QRCodes" asp-action="Index" class="btn btn-outline-secondary">View My QR Codes</a>
+        </div>
+    </div>
+}
+
+<div class="row justify-content-center">
+    <div class="col-12" style="max-width:600px;">
+        <h2 class="mb-4">Create QR Code</h2>
+
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+
+            <div class="mb-3">
+                <label asp-for="DecodedText" class="form-label fw-semibold"></label>
+                <input asp-for="DecodedText" id="decodedTextInput" class="form-control"
+                       placeholder="Up to 100 printable ASCII characters (letters, digits, spaces, symbols)"
+                       maxlength="100" autocomplete="off"
+                       oninput="updateTextCounter()" />
+                <div class="d-flex justify-content-between mt-1">
+                    <span asp-validation-for="DecodedText" class="text-danger small"></span>
+                    <span id="textCounter" class="text-muted small ms-auto">0 / 100</span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ErrorCorrectionLevel" class="form-label fw-semibold"></label>
+                <select asp-for="ErrorCorrectionLevel" class="form-select">
+                    <option value="L">L — Low (7% recovery)</option>
+                    <option value="M">M — Medium (15% recovery)</option>
+                    <option value="Q">Q — Quartile (25% recovery)</option>
+                    <option value="H">H — High (30% recovery)</option>
+                </select>
+                <span asp-validation-for="ErrorCorrectionLevel" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="QRVersion" class="form-label fw-semibold"></label>
+                <select asp-for="QRVersion" class="form-select">
+                    @for (int v = 1; v <= 10; v++)
+                    {
+                        <option value="@v">@v</option>
+                    }
+                </select>
+                <div class="form-text">Higher version = larger code = more data capacity.</div>
+                <span asp-validation-for="QRVersion" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Notes" class="form-label fw-semibold">
+                    Notes <span class="text-muted fw-normal">(optional)</span>
+                </label>
+                <textarea asp-for="Notes" id="notesInput" class="form-control" rows="3"
+                          maxlength="300" placeholder="Optional annotation..."
+                          oninput="updateNotesCounter()"></textarea>
+                <div class="d-flex justify-content-between mt-1">
+                    <span asp-validation-for="Notes" class="text-danger small"></span>
+                    <span id="notesCounter" class="text-muted small ms-auto">0 / 300</span>
+                </div>
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg">Generate &amp; Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        function updateTextCounter() {
+            const len = document.getElementById('decodedTextInput').value.length;
+            const counter = document.getElementById('textCounter');
+            counter.textContent = len + ' / 100';
+            counter.className = len >= 90 ? 'text-danger small ms-auto' : 'text-muted small ms-auto';
+        }
+        function updateNotesCounter() {
+            const len = document.getElementById('notesInput').value.length;
+            const counter = document.getElementById('notesCounter');
+            counter.textContent = len + ' / 300';
+            counter.className = len >= 280 ? 'text-danger small ms-auto' : 'text-muted small ms-auto';
+        }
+        // Initialise on page load (handles back-button with pre-filled value)
+        document.addEventListener('DOMContentLoaded', function () {
+            updateTextCounter();
+            updateNotesCounter();
+        });
+
+        function downloadQrPng() {
+            const img = document.getElementById('qrPreviewImg');
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            // White background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 512, 512);
+            ctx.drawImage(img, 0, 0, 512, 512);
+            const link = document.createElement('a');
+            link.download = '@(ViewBag.QrFileName ?? "qrcode")' + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+}
