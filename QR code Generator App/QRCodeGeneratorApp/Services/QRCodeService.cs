@@ -1,6 +1,6 @@
 using Net.Codecrete.QrCodeGenerator;
-using System.Drawing;
-using System.Drawing.Imaging;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Png;
 
 namespace QRCodeGeneratorApp.Services
 {
@@ -100,12 +100,11 @@ namespace QRCodeGeneratorApp.Services
                     const int border = 4;
                     byte[] bmpBytes = qr.ToBmpBitmap(scale, border);
 
-#pragma warning disable CA1416 // System.Drawing.Common is Windows-only; app targets Windows
                     using var bmpStream = new MemoryStream(bmpBytes);
-                    using var bitmap = Image.FromStream(bmpStream);
+                    using var image = SixLabors.ImageSharp.Image.Load(bmpStream);
                     using var pngStream = new MemoryStream();
-                    bitmap.Save(pngStream, ImageFormat.Png);
-#pragma warning restore CA1416
+                    image.Save(pngStream, new PngEncoder());
+
                     return (true, pngStream.ToArray(), "image/png", string.Empty);
                 }
                 else
