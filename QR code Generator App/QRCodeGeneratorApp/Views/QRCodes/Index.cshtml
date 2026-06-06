@@ -202,7 +202,7 @@ else
                     data-image-url="@Url.Action("DownloadImage", "QRCodes", new { id = item.Id })"
                     data-delete-url="@Url.Action("Delete", "QRCodes", new { id = item.Id })"
                     style="cursor:pointer;">
-                    <td style="word-break:break-word">@item.DecodedText</td>
+                    <td style="word-break:break-word;white-space:pre-wrap">@item.DecodedText</td>
                     <td>@item.ErrorCorrectionLevel</td>
                     <td>@item.QRVersion</td>
                     <td style="white-space:normal">@item.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
