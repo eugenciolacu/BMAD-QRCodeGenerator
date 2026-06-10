@@ -7,6 +7,9 @@ project.lock.json
 # Visual Studio Code
 .vscode
 
+# JetBrains Rider
+.idea/
+
 # User-specific files
 *.suo
 *.user
@@ -27,3 +30,27 @@ bld/
 msbuild.log
 msbuild.err
 msbuild.wrn
+
+# Publish output
+[Pp]ublish/
+
+# Test results
+[Tt]est[Rr]esults/
+*.trx
+*.coverage
+*.coveragexml
+
+# Application logs
+**/Logs/
+*.log
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+!**/[Pp]ackages/repositories.config
+
+# Docker secrets
+.env
+.env.*
+!.env.example

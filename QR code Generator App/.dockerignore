@@ -1,0 +1,16 @@
+**/.DS_Store
+**/.git
+**/.gitignore
+**/.vs
+**/.vscode
+**/bin
+**/obj
+**/Logs
+**/*.user
+**/*.suo
+**/node_modules
+docker-compose*.yml
+.dockerignore
+README.MD
+docs/
+qa/
