@@ -92,6 +92,31 @@ docker volume rm qr-code-generator-app_sqlserver_data
 
 ---
 
+## Build cache
+
+### Check disk usage
+```bash
+docker system df
+```
+
+### Prune dangling build cache only
+```bash
+docker builder prune
+```
+
+### Prune all build cache
+```bash
+docker builder prune -a
+```
+
+### Prune everything unused (cache, stopped containers, unused images & networks)
+> Does not affect running containers or named volumes.
+```bash
+docker system prune -a
+```
+
+---
+
 ## Application
 
 The web app is available at: **http://localhost:8080**
