@@ -27,7 +27,7 @@ services:
         condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=MyDatabase;User Id=sa;Password=StrongPassword123!;TrustServerCertificate=True;"
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=QRCodeGeneratorApp;User Id=sa;Password=StrongPassword123!;TrustServerCertificate=True;"
     ports:
       - "8080:8080"
     volumes:
