@@ -127,7 +127,7 @@ SQL Server is available at: **localhost:1433**
 
 
 
-# Playwright
+# Playwright in docker container
 
 ## E2E Testing (Playwright)
 
@@ -156,7 +156,9 @@ The reports and test results are synced to your Windows machine via volumes:
 - HTML Report: index.html
 - Asset Traces: test-results
 
-## for --headed
+## for --headed 
+
+Not easily possible with Docker
 
 This is a classic "Docker limitation" that everyone runs into when learning.
 
@@ -177,3 +179,10 @@ Playwright has a specific UI mode that runs a web server. You can access it from
   ```bash
   http://localhost:9323
   ```
+
+  ## for --headed 
+
+  If needed to see browser can be done on Windows:
+
+  - Start containers except automation test container
+  - Rub tests from windows

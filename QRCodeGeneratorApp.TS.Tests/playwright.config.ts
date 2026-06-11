@@ -9,7 +9,7 @@ import { defineConfig, devices } from '@playwright/test';
 // dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 // Get the URL from environment variable, fallback to localhost for development
-const baseURL = process.env.BASE_URL || 'http://localhost:5000';
+const baseURL = process.env.BASE_URL || 'http://localhost:8080';
 
 /**
  * See https://playwright.dev/docs/test-configuration.
