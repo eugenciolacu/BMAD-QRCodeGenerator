@@ -122,3 +122,58 @@ docker system prune -a
 The web app is available at: **http://localhost:8080**
 
 SQL Server is available at: **localhost:1433**
+
+
+
+
+
+# Playwright
+
+## E2E Testing (Playwright)
+
+### Run tests (in the running container)
+
+```bash
+docker exec playwright-e2e npx playwright test
+```
+
+Tips:
+- **Inside Docker**: Use `--ui` to see the dashboard at http://localhost:9323.
+- **On Windows**: Run `npx playwright test --ui` (locally) to see an actual browser window open on your screen.
+- See the browser window: add ```--headed```
+- Run a single project/browser: ```--project=chromium```
+- Open testing UI: ```--ui```
+
+### Run a specific test file
+
+```bash
+docker exec playwright-e2e npx playwright test tests/example.spec.ts
+```
+
+### View Playwright Reports
+
+The reports and test results are synced to your Windows machine via volumes:
+- HTML Report: index.html
+- Asset Traces: test-results
+
+## for --headed
+
+This is a classic "Docker limitation" that everyone runs into when learning.
+
+The reason --headed (visible browser) does not work is that Docker containers do not have a display (Monitor/Screen). They are "headless" Linux environments.
+
+Playwright has a specific UI mode that runs a web server. You can access it from your Windows browser.
+
+- Add a port mapping to your playwright service
+  ```bash
+  ports:
+  - "9323:9323"
+  ```
+- Run it with the ```--host``` flag
+  ```bash
+  docker exec playwright-e2e npx playwright test --ui --ui-host=0.0.0.0 --ui-port=9323
+  ```
+- Open your browser to:
+  ```bash
+  http://localhost:9323
+  ```
