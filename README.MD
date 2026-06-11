@@ -158,7 +158,7 @@ The reports and test results are synced to your Windows machine via volumes:
 
 ## for --headed 
 
-Not easily possible with Docker
+Not easily possible with Docker, can be run as ```--ui```
 
 This is a classic "Docker limitation" that everyone runs into when learning.
 
@@ -180,9 +180,12 @@ Playwright has a specific UI mode that runs a web server. You can access it from
   http://localhost:9323
   ```
 
-  ## for --headed 
+## for --headed, working solution 
 
-  If needed to see browser can be done on Windows:
+If needed to see browser then playwright project can be run on Windows:
 
-  - Start containers except automation test container
-  - Rub tests from windows
+- Start containers except automation test container
+- Rub tests from windows
+  ```bash
+  npx playwright test --headed
+  ```
