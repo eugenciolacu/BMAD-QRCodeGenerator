@@ -121,7 +121,7 @@ docker system prune -a
 
 The web app is available at: **http://localhost:8080**
 
-SQL Server is available at: **localhost:1433**
+SQL Server is available at: **localhost:1434**
 
 
 
