@@ -61,7 +61,8 @@ builder.Services.AddScoped<QRCodeGeneratorApp.Services.IPdfExportService, QRCode
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.HttpOnly = true;
-    options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always;
+    options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.None;;
+    // options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always;
     options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict;
     options.Cookie.Name = ".QRCodeGeneratorApp.Identity";
     options.SlidingExpiration = true;
