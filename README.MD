@@ -1,10 +1,29 @@
 # QR Code Generator App
 
-## Docker Commands
+## Environments
+
+There are two separate environments managed by two compose files:
+
+| | Production | Testing |
+|---|---|---|
+| Compose files | `docker-compose.yml` | `docker-compose.yml` + `docker-compose.test.yml` |
+| Database | `QRCodeGeneratorApp` | `QRCodeGeneratorApp_Test` |
+| Rate limiting | Enabled | Disabled |
+| Email confirmation | Required | Disabled |
+| Playwright container | Not included | Included |
+
+---
+
+## Docker Commands — Production
 
 ### First-time build & start
 ```bash
 docker compose up -d --build
+```
+
+### Build & run test stack (sqlserver + webapp in Testing mode + playwright)
+```bash
+docker compose -f docker-compose.yml -f docker-compose.test.yml up -d --build
 ```
 
 ### Start (without rebuilding)
@@ -31,6 +50,35 @@ docker compose down -v
 ```bash
 docker compose build webapp
 docker compose up -d webapp
+```
+
+---
+
+## Docker Commands — Testing
+
+### First-time build & start (test stack)
+```bash
+docker compose -f docker-compose.yml -f docker-compose.test.yml up -d --build
+```
+
+### Start test stack (without rebuilding)
+```bash
+docker compose -f docker-compose.yml -f docker-compose.test.yml up -d
+```
+
+### Stop test stack (keep data)
+```bash
+docker compose -f docker-compose.yml -f docker-compose.test.yml stop
+```
+
+### Stop and remove test stack (keep volumes)
+```bash
+docker compose -f docker-compose.yml -f docker-compose.test.yml down
+```
+
+### Stop, remove test stack and delete all test data (volumes)
+```bash
+docker compose -f docker-compose.yml -f docker-compose.test.yml down -v
 ```
 
 ---
@@ -131,6 +179,9 @@ SQL Server is available at: **localhost:1434**
 
 ## E2E Testing (Playwright)
 
+> Playwright runs against the **Testing** environment only (isolated `QRCodeGeneratorApp_Test` database, rate limiting disabled, email confirmation disabled).
+> Start the test stack before running tests.
+
 ### Run tests (in the running container)
 
 ```bash
@@ -139,7 +190,7 @@ docker exec playwright-e2e npx playwright test
 
 Tips:
 - **Inside Docker**: Use `--ui` to see the dashboard at http://localhost:9323.
-- **On Windows**: Run `npx playwright test --ui` (locally) to see an actual browser window open on your screen.
+- **On macOS/Windows**: Run `npx playwright test --ui` (locally) to see an actual browser window open on your screen.
 - See the browser window: add ```--headed```
 - Run a single project/browser: ```--project=chromium```
 - Open testing UI: ```--ui```
@@ -147,7 +198,7 @@ Tips:
 ### Run a specific test file
 
 ```bash
-docker exec playwright-e2e npx playwright test tests/example.spec.ts
+docker exec playwright-e2e npx playwright test tests/auth.spec.ts
 ```
 
 ### View Playwright Reports
@@ -182,10 +233,13 @@ Playwright has a specific UI mode that runs a web server. You can access it from
 
 ## for --headed, working solution 
 
-If needed to see browser then playwright project can be run on Windows:
+If needed to see browser then playwright project can be run locally:
 
-- Start containers except automation test container
-- Rub tests from windows
+- Start the test stack without playwright container:
+  ```bash
+  docker compose -f docker-compose.yml -f docker-compose.test.yml up -d sqlserver webapp
+  ```
+- Run tests locally with a visible browser:
   ```bash
   npx playwright test --headed
   ```

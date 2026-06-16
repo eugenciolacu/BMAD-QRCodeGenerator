@@ -12,17 +12,22 @@ QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add rate limiting (basic fixed window, global policy)
-builder.Services.AddRateLimiter(options =>
+var isTestingEnv = builder.Environment.IsEnvironment("Testing");
+
+// Add rate limiting (basic fixed window, global policy) — disabled in Testing environment
+if (!isTestingEnv)
 {
-    options.AddFixedWindowLimiter("default", limiterOptions =>
+    builder.Services.AddRateLimiter(options =>
     {
-        limiterOptions.PermitLimit = 10; // 10 requests
-        limiterOptions.Window = TimeSpan.FromSeconds(10); // per 10 seconds
-        limiterOptions.QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst;
-        limiterOptions.QueueLimit = 2;
+        options.AddFixedWindowLimiter("default", limiterOptions =>
+        {
+            limiterOptions.PermitLimit = 10; // 10 requests
+            limiterOptions.Window = TimeSpan.FromSeconds(10); // per 10 seconds
+            limiterOptions.QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst;
+            limiterOptions.QueueLimit = 2;
+        });
     });
-});
+}
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -33,7 +38,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDefaultIdentity<IdentityUser>(options => 
     {
         // Set to 'true' to require email confirmation before sign-in; set to 'false' to allow immediate login after registration.
-        options.SignIn.RequireConfirmedAccount = true;
+        options.SignIn.RequireConfirmedAccount = !isTestingEnv; // off for tests
         options.Password.RequireDigit = true;
         options.Password.RequireLowercase = true;
         options.Password.RequireUppercase = true;
@@ -105,8 +110,10 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-
-app.UseRateLimiter();
+if (!isTestingEnv)
+{
+    app.UseRateLimiter();
+}
 app.UseAuthentication();
 app.UseAuthorization();
 

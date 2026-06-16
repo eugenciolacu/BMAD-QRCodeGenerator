@@ -40,25 +40,6 @@ services:
       retries: 5
       start_period: 10s
 
-  playwright:
-    build:
-      context: "./QRCodeGeneratorApp.TS.Tests"
-      dockerfile: Dockerfile
-    container_name: playwright-e2e
-    depends_on:
-      webapp:
-        condition: service_healthy # Wait for webapp to be ready
-    environment:
-      - BASE_URL=http://webapp:8080
-    volumes:
-      - ./QRCodeGeneratorApp.TS.Tests/playwright-report:/app/playwright-report
-      - ./QRCodeGeneratorApp.TS.Tests/test-results:/app/test-results
-    # This prevents the container from exiting immediately if you want to exec into it
-    tty: true          # This simulates a terminal
-    stdin_open: true   # This keeps the input stream open
-    ports:
-      - "9323:9323"
-
 volumes:
   sqlserver_data:
   app_logs:
