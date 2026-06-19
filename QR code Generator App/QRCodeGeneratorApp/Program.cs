@@ -35,7 +35,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => 
+builder.Services.AddDefaultIdentity<IdentityUser>(options =>
     {
         // Set to 'true' to require email confirmation before sign-in; set to 'false' to allow immediate login after registration.
         options.SignIn.RequireConfirmedAccount = !isTestingEnv; // off for tests
@@ -66,7 +66,7 @@ builder.Services.AddScoped<QRCodeGeneratorApp.Services.IPdfExportService, QRCode
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.HttpOnly = true;
-    options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.None;;
+    options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.None;
     // options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always;
     options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict;
     options.Cookie.Name = ".QRCodeGeneratorApp.Identity";
@@ -86,11 +86,33 @@ builder.Host.UseSerilog();
 
 var app = builder.Build();
 
-// Auto-apply migrations at startup
+// Auto-apply migrations at startup; in Testing, wipe and recreate for a clean slate
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    if (isTestingEnv)
+    {
+        db.Database.EnsureDeleted();
+    }
     db.Database.Migrate();
+
+    if (isTestingEnv)
+    {
+        // Seed a test user so Playwright auth tests have a known account to log in with
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+        const string testEmail = "test@example.com";
+        const string testPassword = "Test..2026";
+        if (await userManager.FindByEmailAsync(testEmail) == null)
+        {
+            var testUser = new IdentityUser
+            {
+                UserName = testEmail,
+                Email = testEmail,
+                EmailConfirmed = true
+            };
+            await userManager.CreateAsync(testUser, testPassword);
+        }
+    }
 }
 
 // Configure the HTTP request pipeline.
