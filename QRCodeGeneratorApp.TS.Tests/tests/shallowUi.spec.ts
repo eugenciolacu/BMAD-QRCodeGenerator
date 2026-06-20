@@ -1,25 +1,45 @@
 import { test, expect } from '@playwright/test';
+import { test as authTest } from '../fixtures/auth.fixture';
+import { HomePage } from '../pages/HomePage';
 
-test('homepage has correct title', async ({ page }) => {
-  // Logic: Go to the home page (which will be http://webapp:8080 in Docker)
-  await page.goto('/');
+test.describe('anonymous user', () => {
+  let homePage: HomePage;
 
-  // Update this to match your actual app's title
-  await expect(page).toHaveTitle(/Dashboard - QR Code Generator/i);
+  test.beforeEach(async ({ page }) => {
+    homePage = new HomePage(page);
+    await homePage.goto();
+  });
+
+  test('homepage has correct title', async ({ page }) => {
+    await expect(page).toHaveTitle(/Dashboard - QR Code Generator/i);
+  });
+
+  test('register link is present', async () => {
+    await expect(homePage.registerLink).toBeVisible();
+  });
+
+  test('login link is present', async () => {
+    await expect(homePage.loginLink).toBeVisible();
+  });
 });
 
-test('can see register link', async ({ page }) => {
-  await page.goto('/');
-  
-  // Checking if the Identity system (Register link) is visible
-  const registerLink = page.getByRole('link', { name: 'Register' });
-  await expect(registerLink).toBeVisible();
-});
+authTest.describe('authenticated user', () => {
+  let homePage: HomePage;
 
-test('can see login link', async ({ page }) => {
-  await page.goto('/');
-  
-  // Checking if the Identity system (Login link) is visible
-  const loginLink = page.getByRole('link', { name: 'Login' });
-  await expect(loginLink).toBeVisible();
+  authTest.beforeEach(async ({ page }) => {
+    homePage = new HomePage(page);
+    await homePage.goto();
+  });
+
+  authTest('greeting with email is visible', async () => {
+    await expect(homePage.userGreeting).toBeVisible();
+  });
+
+  authTest('create QR code link is present', async () => {
+    await expect(homePage.createQRCodeLink).toBeVisible();
+  });
+
+  authTest('view my QR codes link is present', async () => {
+    await expect(homePage.viewMyQRCodesLink).toBeVisible();
+  });
 });
