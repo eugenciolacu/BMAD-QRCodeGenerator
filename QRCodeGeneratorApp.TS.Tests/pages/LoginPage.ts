@@ -2,15 +2,15 @@ import { type Page, type Locator } from '@playwright/test';
 
 export class LoginPage {
   readonly page: Page;
-  readonly emailInput: Locator;
-  readonly passwordInput: Locator;
-  readonly submitButton: Locator;
+  readonly emailInputLocator: Locator;
+  readonly passwordInputLocator: Locator;
+  readonly submitButtonLocator: Locator;
 
   constructor(page: Page) {
     this.page = page;
-    this.emailInput = page.getByLabel('Email');
-    this.passwordInput = page.getByLabel('Password');
-    this.submitButton = page.getByRole('button', { name: 'Log in' });
+    this.emailInputLocator = page.getByLabel('Email');
+    this.passwordInputLocator = page.getByLabel('Password');
+    this.submitButtonLocator = page.getByRole('button', { name: 'Log in' });
   }
 
   async goto() {
@@ -18,8 +18,8 @@ export class LoginPage {
   }
 
   async login(email: string, password: string) {
-    await this.emailInput.fill(email);
-    await this.passwordInput.fill(password);
-    await this.submitButton.click();
+    await this.emailInputLocator.fill(email);
+    await this.passwordInputLocator.fill(password);
+    await this.submitButtonLocator.click();
   }
 }
