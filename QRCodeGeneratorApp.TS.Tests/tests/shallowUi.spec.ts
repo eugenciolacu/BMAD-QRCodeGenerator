@@ -15,11 +15,11 @@ test.describe('anonymous user', () => {
   });
 
   test('register link is present', async () => {
-    await expect(homePage.registerLink).toBeVisible();
+    await expect(homePage.registerLinkLocator).toBeVisible();
   });
 
   test('login link is present', async () => {
-    await expect(homePage.loginLink).toBeVisible();
+    await expect(homePage.loginLinkLocator).toBeVisible();
   });
 });
 
@@ -32,14 +32,26 @@ authTest.describe('authenticated user', () => {
   });
 
   authTest('greeting with email is visible', async () => {
-    await expect(homePage.userGreeting).toBeVisible();
+    await expect(homePage.userGreetingLocator).toBeVisible();
   });
 
   authTest('create QR code link is present', async () => {
-    await expect(homePage.createQRCodeLink).toBeVisible();
+    await expect(homePage.createQRCodeLinkLocator).toBeVisible();
   });
 
   authTest('view my QR codes link is present', async () => {
-    await expect(homePage.viewMyQRCodesLink).toBeVisible();
+    await expect(homePage.viewMyQRCodesLinkLocator).toBeVisible();
+  });
+
+  authTest('menu links are present', async () => {
+    await authTest.step('Home link is visible', async () => {
+      await expect(homePage.menuHomeLinkLocator).toBeVisible();
+    });
+    await authTest.step('Create QR Code link is visible', async () => {
+      await expect(homePage.menuCreateQRCodeLinkLocator).toBeVisible();
+    });
+    await authTest.step('My QR Codes link is visible', async () => {
+      await expect(homePage.menuMyQRCodesLinkLocator).toBeVisible();
+    });
   });
 });

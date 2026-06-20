@@ -2,19 +2,29 @@ import { type Page, type Locator } from '@playwright/test';
 
 export class HomePage {
   readonly page: Page;
-  readonly registerLink: Locator;
-  readonly loginLink: Locator;
-  readonly userGreeting: Locator;
-  readonly createQRCodeLink: Locator;
-  readonly viewMyQRCodesLink: Locator;
+  readonly registerLinkLocator: Locator;
+  readonly loginLinkLocator: Locator;
+  readonly userGreetingLocator: Locator;
+  readonly createQRCodeLinkLocator: Locator;
+  readonly viewMyQRCodesLinkLocator: Locator;
+  readonly menuHomeLinkLocator: Locator;
+  readonly menuCreateQRCodeLinkLocator: Locator;
+  readonly menuMyQRCodesLinkLocator: Locator;
 
   constructor(page: Page) {
     this.page = page;
-    this.registerLink = page.getByRole('link', { name: 'Register' });
-    this.loginLink = page.getByRole('link', { name: 'Login' });
-    this.userGreeting = page.getByText(/Logged user:/i);
-    this.createQRCodeLink = page.getByRole('link', { name: '+ Create QR Code' });
-    this.viewMyQRCodesLink = page.getByRole('link', { name: 'View My QR Codes' });
+    this.registerLinkLocator = page.getByRole('link', { name: 'Register' });
+    this.loginLinkLocator = page.getByRole('link', { name: 'Login' });
+    this.userGreetingLocator = page.getByText(/Logged user:/i);
+    this.createQRCodeLinkLocator = page.getByRole('link', { name: '+ Create QR Code' });
+    this.viewMyQRCodesLinkLocator = page.getByRole('link', { name: 'View My QR Codes' });
+    this.menuHomeLinkLocator = page.getByRole('navigation').getByRole('link', { name: 'Home' });
+    this.menuCreateQRCodeLinkLocator = page
+      .getByRole('navigation')
+      .getByRole('link', { name: 'Create QR Code' });
+    this.menuMyQRCodesLinkLocator = page
+      .getByRole('navigation')
+      .getByRole('link', { name: 'My QR Codes' });
   }
 
   async goto() {
