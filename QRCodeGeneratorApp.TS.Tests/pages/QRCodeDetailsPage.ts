@@ -8,6 +8,7 @@ export class QRCodeDetailsPage {
   readonly errorCorrectionValueLocator: Locator;
   readonly qrVersionValueLocator: Locator;
   readonly notesValueLocator: Locator;
+  readonly deleteButtonLocator: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -17,5 +18,10 @@ export class QRCodeDetailsPage {
     this.errorCorrectionValueLocator = page.locator('dt:has-text("Error Correction") + dd');
     this.qrVersionValueLocator = page.locator('dt:has-text("QR Version") + dd');
     this.notesValueLocator = page.locator('dt:has-text("Notes") + dd');
+    this.deleteButtonLocator = page.getByRole('button', { name: 'Delete' });
+  }
+
+  async deleteQRCode() {
+    await this.deleteButtonLocator.click();
   }
 }
