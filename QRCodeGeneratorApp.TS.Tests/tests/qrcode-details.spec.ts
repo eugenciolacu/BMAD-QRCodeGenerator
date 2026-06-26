@@ -42,4 +42,10 @@ test.describe('QR code details', () => {
     await expect(detailsPage.qrVersionValueLocator).toHaveText('5');
     await expect(detailsPage.notesValueLocator).toHaveText('beforeAll note');
   });
+
+  test('details page shows the same QR code image', async ({ page }) => {
+    const detailsPage = new QRCodeDetailsPage(page);
+    await page.goto(detailsUrl);
+    await expect(detailsPage.qrCodeImageLocator).toHaveScreenshot('qr-code-details.png');
+  });
 });
