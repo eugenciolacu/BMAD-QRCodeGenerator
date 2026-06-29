@@ -66,5 +66,7 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
-/QRCodeGeneratorApp.TS.Tests/playwright-report/index.html
-/QRCodeGeneratorApp.TS.Tests/test-results/.last-run.json
+QRCodeGeneratorApp.TS.Tests/docker-playwright-report/
+QRCodeGeneratorApp.TS.Tests/docker-test-results/
+QRCodeGeneratorApp.TS.Tests/playwright-report/index.html
+QRCodeGeneratorApp.TS.Tests/test-results/.last-run.json

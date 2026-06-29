@@ -271,3 +271,7 @@ If needed to see browser then playwright project can be run locally:
   ```bash
   npx playwright test --headed
   ```
+
+## To add screenshots for docker environment
+
+Run tests in docker. If the screenshot do not exists then it will be created but the test fails. Re-build image and created screenshots will be included into image (/app/screenshots).
